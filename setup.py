@@ -4,11 +4,11 @@ from setuptools import setup
 
 setup(
     name='django-scheduler',
-    version='0.8.8',
+    version='0.8.9',
     description='A calendaring app for Django.',
-    author='Leonardo Lazzaro',
-    author_email='lazzaroleonardo@gmail.com',
-    url='https://github.com/llazzaro/django-scheduler',
+    author='Chris Ward',
+    author_email='chris.dev.ward@gmail.com',
+    url='https://github.com/cwardcode/django-scheduler',
     packages=[
         'schedule',
         'schedule.feeds',

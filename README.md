@@ -9,7 +9,9 @@ Django Scheduler
 [![Documentation Status](https://readthedocs.org/projects/django-scheduler/badge/)](https://django-scheduler.readthedocs.io/)
 
 
-A calendar app for Django
+A calendar app for Django, forked from llazzaro/django-scheduler.
+
+My use case is to add a calendar/schedule system to OpenTreeMap, which passes in extra kwargs to `api_occurrences()` in schedule/views.py.
 
 Information
 ========
