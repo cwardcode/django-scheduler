@@ -295,7 +295,7 @@ def get_next_url(request, default):
 
 
 @check_calendar_permissions
-def api_occurrences(request):
+def api_occurrences(request, **kwargs):
     start = request.GET.get('start')
     end = request.GET.get('end')
     calendar_slug = request.GET.get('calendar_slug')
