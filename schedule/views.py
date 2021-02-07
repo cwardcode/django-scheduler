@@ -299,7 +299,6 @@ def api_occurrences(request, **kwargs):
     start = request.GET.get('start')
     end = request.GET.get('end')
     calendar_slug = request.GET.get('calendar_slug')
-    timezone = request.GET.get('timezone')
 
     try:
         response_data = _api_occurrences(start, end, calendar_slug, timezone)
@@ -317,13 +316,7 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     # TODO: improve this code with date util package
     if '-' in start:
         def convert(ddatetime):
-            if ddatetime:
-                ddatetime = ddatetime.split(' ')[0]
-                try:
-                    return datetime.datetime.strptime(ddatetime, '%Y-%m-%d')
-                except ValueError:
-                    # try a different date string format first before failing
-                    return datetime.datetime.strptime(ddatetime, '%Y-%m-%dT%H:%M:%S')
+	    return dateutil.parser.parse(ddatetime)
 
     else:
         def convert(ddatetime):
@@ -332,16 +325,6 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     start = convert(start)
     end = convert(end)
     current_tz = False
-    if timezone and timezone in pytz.common_timezones:
-        # make start and end dates aware in given timezone
-        current_tz = pytz.timezone(timezone)
-        start = current_tz.localize(start)
-        end = current_tz.localize(end)
-    elif settings.USE_TZ:
-        # If USE_TZ is True, make start and end dates aware in UTC timezone
-        utc = pytz.UTC
-        start = utc.localize(start)
-        end = utc.localize(end)
 
     if calendar_slug:
         # will raise DoesNotExist exception if no match
