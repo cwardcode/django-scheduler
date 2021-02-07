@@ -351,7 +351,7 @@ def _api_occurrences(start, end, calendar_slug, timezone):
         def convert(ddatetime):
             if ddatetime:
                 try:
-                    return dateutil.parser.parse(ddatetime) 
+                    return dateutil.parser.parse(ddatetime)
                 except ValueError:
                     # Try legacy-supported datetime format.
                     ddatetime = ddatetime.split(" ")[0]
