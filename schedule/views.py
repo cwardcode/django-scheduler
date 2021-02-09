@@ -1,15 +1,10 @@
 import datetime
-from urllib.parse import quote
+import urllib
 
 import dateutil.parser
-import pytz
-from django.conf import settings
 from django.db.models import F, Q
 from django.http import (
-    Http404,
-    HttpResponseBadRequest,
-    HttpResponseRedirect,
-    JsonResponse,
+    Http404, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse,
 )
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -19,61 +14,51 @@ from django.views.decorators.http import require_POST
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (
-    CreateView,
-    DeleteView,
-    ModelFormMixin,
-    ProcessFormView,
-    UpdateView,
+    CreateView, DeleteView, ModelFormMixin, ProcessFormView, UpdateView,
 )
 
 from schedule.forms import EventForm, OccurrenceForm
 from schedule.models import Calendar, Event, Occurrence
 from schedule.periods import weekday_names
 from schedule.settings import (
-    CHECK_EVENT_PERM_FUNC,
-    CHECK_OCCURRENCE_PERM_FUNC,
-    EVENT_NAME_PLACEHOLDER,
-    GET_EVENTS_FUNC,
-    OCCURRENCE_CANCEL_REDIRECT,
-    USE_FULLCALENDAR,
+    CHECK_EVENT_PERM_FUNC, CHECK_OCCURRENCE_PERM_FUNC, EVENT_NAME_PLACEHOLDER,
+    GET_EVENTS_FUNC, OCCURRENCE_CANCEL_REDIRECT, USE_FULLCALENDAR,
 )
 from schedule.utils import (
-    check_calendar_permissions,
-    check_event_permissions,
-    check_occurrence_permissions,
-    coerce_date_dict,
+    check_calendar_permissions, check_event_permissions,
+    check_occurrence_permissions, coerce_date_dict,
 )
 
 
-class CalendarViewPermissionMixin:
+class CalendarViewPermissionMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
-        view = super().as_view(**initkwargs)
+        view = super(CalendarViewPermissionMixin, cls).as_view(**initkwargs)
         return check_calendar_permissions(view)
 
 
-class EventEditPermissionMixin:
+class EventEditPermissionMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
-        view = super().as_view(**initkwargs)
+        view = super(EventEditPermissionMixin, cls).as_view(**initkwargs)
         return check_event_permissions(view)
 
 
-class OccurrenceEditPermissionMixin:
+class OccurrenceEditPermissionMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
-        view = super().as_view(**initkwargs)
+        view = super(OccurrenceEditPermissionMixin, cls).as_view(**initkwargs)
         return check_occurrence_permissions(view)
 
 
-class CancelButtonMixin:
+class CancelButtonMixin(object):
     def post(self, request, *args, **kwargs):
         next_url = kwargs.get("next")
         self.success_url = get_next_url(request, next_url)
         if "cancel" in request.POST:
             return HttpResponseRedirect(self.success_url)
         else:
-            return super().post(request, *args, **kwargs)
+            return super(CancelButtonMixin, self).post(request, *args, **kwargs)
 
 
 class CalendarMixin(CalendarViewPermissionMixin):
@@ -89,7 +74,7 @@ class FullCalendarView(CalendarMixin, DetailView):
     template_name = "fullcalendar.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super(FullCalendarView, self).get_context_data()
         context["calendar_slug"] = self.kwargs.get("calendar_slug")
         return context
 
@@ -98,7 +83,7 @@ class CalendarByPeriodsView(CalendarMixin, DetailView):
     template_name = "schedule/calendar_by_period.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(CalendarByPeriodsView, self).get_context_data(**kwargs)
         calendar = self.object
         period_class = self.kwargs["period"]
         try:
@@ -123,7 +108,7 @@ class CalendarByPeriodsView(CalendarMixin, DetailView):
                 "period": period,
                 "calendar": calendar,
                 "weekday_names": weekday_names,
-                "here": quote(self.request.get_full_path()),
+                "here": urllib.pathname2url(self.request.get_full_path()),
             }
         )
         return context
@@ -139,7 +124,7 @@ class OccurrenceEditMixin(
     CancelButtonMixin, OccurrenceEditPermissionMixin, OccurrenceMixin
 ):
     def get_initial(self):
-        initial_data = super().get_initial()
+        initial_data = super(OccurrenceEditMixin, self).get_initial()
         _, self.object = get_occurrence(**self.kwargs)
         return initial_data
 
@@ -152,7 +137,7 @@ class OccurrencePreview(OccurrenceMixin, ModelFormMixin, ProcessFormView):
     template_name = "schedule/occurrence.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super(OccurrencePreview, self).get_context_data()
         context = {"event": self.object.event, "occurrence": self.object}
         return context
 
@@ -209,7 +194,7 @@ class EditEventView(EventEditMixin, UpdateView):
             original_end=F("original_end") + dte,
         )
         event.save()
-        return super().form_valid(form)
+        return super(EditEventView, self).form_valid(form)
 
 
 class CreateEventView(EventEditMixin, CreateView):
@@ -245,7 +230,7 @@ class DeleteEventView(EventEditMixin, DeleteView):
     template_name = "schedule/delete_event.html"
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
+        ctx = super(DeleteEventView, self).get_context_data(**kwargs)
         ctx["next"] = self.get_success_url()
         return ctx
 
