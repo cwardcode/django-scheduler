@@ -354,7 +354,7 @@ def _api_occurrences(start, end, calendar_slug, timezone):
                     return dateutil.parser.parse(ddatetime)
                 except ValueError:
                     # Try legacy-supported datetime format.
-                    ddatetime = ddatetime.split(" ")[0]
+                    ddatetime = ddatetime.split("T")[0]
                     try:
                         return datetime.datetime.strptime(ddatetime, "%Y-%m-%d")
                     except ValueError:
