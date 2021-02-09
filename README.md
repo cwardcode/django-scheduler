@@ -25,7 +25,7 @@ Installation
 ========
 
 ```bash
-pip install django-scheduler
+pip install django-scheduler-otm
 ```
 
 Edit your `settings.py`
