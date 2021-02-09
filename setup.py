@@ -3,12 +3,12 @@
 from setuptools import setup
 
 setup(
-    name='django-scheduler',
-    version='0.8.9',
-    description='A calendaring app for Django.',
+    name='django-scheduler-otm',
+    version='0.0.1',
+    description='A calendaring app for OpenTreeMap.',
     author='Chris Ward',
     author_email='chris.dev.ward@gmail.com',
-    url='https://github.com/cwardcode/django-scheduler',
+    url='https://github.com/cwardcode/django-scheduler-otm',
     packages=[
         'schedule',
         'schedule.feeds',
@@ -32,14 +32,9 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Topic :: Utilities',
     ],
-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+    python_requires=">=2.7",
     install_requires=[
         'Django>=1.11',
         'python-dateutil>=2.1',

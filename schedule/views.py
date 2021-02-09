@@ -235,7 +235,8 @@ class CreateEventView(EventEditMixin, CreateView):
     def form_valid(self, form):
         event = form.save(commit=False)
         event.creator = self.request.user
-        event.calendar = get_object_or_404(Calendar, slug=self.kwargs["calendar_slug"])
+        event.calendar = get_object_or_404(
+            Calendar, slug=self.kwargs["calendar_slug"])
         event.save()
         return HttpResponseRedirect(event.get_absolute_url())
 
@@ -289,7 +290,8 @@ def get_occurrence(
         event = get_object_or_404(Event, id=event_id)
         date = timezone.make_aware(
             datetime.datetime(
-                int(year), int(month), int(day), int(hour), int(minute), int(second)
+                int(year), int(month), int(day), int(
+                    hour), int(minute), int(second)
             ),
             tzinfo,
         )
@@ -327,10 +329,9 @@ def get_next_url(request, default):
 
 @check_calendar_permissions
 def api_occurrences(request, **kwargs):
-    start = request.GET.get("start")
-    end = request.GET.get("end")
-    calendar_slug = request.GET.get("calendar_slug")
-    timezone = request.GET.get("timezone")
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    calendar_slug = request.GET.get('calendar_slug')
 
     try:
         response_data = _api_occurrences(start, end, calendar_slug, timezone)
@@ -349,17 +350,7 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     if "-" in start:
 
         def convert(ddatetime):
-            if ddatetime:
-                try:
-                    return dateutil.parser.parse(ddatetime)
-                except ValueError:
-                    # Try legacy-supported datetime format.
-                    ddatetime = ddatetime.split("T")[0]
-                    try:
-                        return datetime.datetime.strptime(ddatetime, "%Y-%m-%d")
-                    except ValueError:
-                        # try a different date string format first before failing
-                        return datetime.datetime.strptime(ddatetime, "%Y-%m-%dT%H:%M:%S")
+            return dateutil.parser.parse(ddatetime)
 
     else:
 
@@ -369,16 +360,6 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     start = convert(start)
     end = convert(end)
     current_tz = False
-    if timezone and timezone in pytz.common_timezones:
-        # make start and end dates aware in given timezone
-        current_tz = pytz.timezone(timezone)
-        start = current_tz.localize(start)
-        end = current_tz.localize(end)
-    elif settings.USE_TZ:
-        # If USE_TZ is True, make start and end dates aware in UTC timezone
-        utc = pytz.UTC
-        start = utc.localize(start)
-        end = utc.localize(end)
 
     if calendar_slug:
         # will raise DoesNotExist exception if no match
@@ -403,7 +384,8 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     for calendar in calendars:
         # create flat list of events from each calendar
         event_list += calendar.events.filter(start__lte=end).filter(
-            Q(end_recurring_period__gte=start) | Q(end_recurring_period__isnull=True)
+            Q(end_recurring_period__gte=start) | Q(
+                end_recurring_period__isnull=True)
         )
     for event in event_list:
         occurrences = event.get_occurrences(start, end)
