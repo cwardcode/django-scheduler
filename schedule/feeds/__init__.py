@@ -15,7 +15,7 @@ class UpcomingEventsFeed(Feed):
     def feed_title(self, obj):
         return "Upcoming Events for %s" % obj.name
 
-    def get_object(self, request, calendar_id):
+    def get_object(self, request, calendar_id, **kwargs):
         return Calendar.objects.get(pk=calendar_id)
 
     def link(self, obj):
