@@ -4,11 +4,11 @@ from setuptools import setup
 
 setup(
     name='django-scheduler',
-    version='0.8.10',
-    description='A calendaring app for Django.',
+    version='0.0.1',
+    description='A calendaring app for OpenTreeMap.',
     author='Chris Ward',
     author_email='chris.dev.ward@gmail.com',
-    url='https://github.com/cwardcode/django-scheduler',
+    url='https://github.com/cwardcode/django-scheduler-otm',
     packages=[
         'schedule',
         'schedule.feeds',
