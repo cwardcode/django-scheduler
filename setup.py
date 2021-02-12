@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='django-scheduler-otm',
-    version='0.0.1',
+    version='0.0.4',
     description='A calendaring app for OpenTreeMap.',
     author='Chris Ward',
     author_email='chris.dev.ward@gmail.com',
