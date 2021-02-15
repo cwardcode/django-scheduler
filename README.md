@@ -1,11 +1,7 @@
 Django Scheduler
 ========
-
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/llazzaro/django-scheduler)
-[<img src="https://img.shields.io/travis/llazzaro/django-scheduler.svg">](https://travis-ci.org/llazzaro/django-scheduler)
-[![Code Health](https://landscape.io/github/llazzaro/django-scheduler/master/landscape.svg?style=flat)](https://landscape.io/github/llazzaro/django-scheduler/master)
-[<img src="https://img.shields.io/coveralls/llazzaro/django-scheduler.svg">](https://coveralls.io/r/llazzaro/django-scheduler)
-[<img src="https://img.shields.io/pypi/v/django-scheduler.svg">](https://pypi.python.org/pypi/django-scheduler)
+[![Build Status](https://travis-ci.com/cwardcode/django-scheduler-otm.svg?branch=develop)](https://travis-ci.com/cwardcode/django-scheduler-otm)
+[<img src="https://img.shields.io/pypi/v/django-scheduler-otm.svg">](https://pypi.python.org/pypi/django-scheduler-otm)
 [![Documentation Status](https://readthedocs.org/projects/django-scheduler/badge/)](https://django-scheduler.readthedocs.io/)
 
 
