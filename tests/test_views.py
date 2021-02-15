@@ -26,14 +26,16 @@ class TestViews(TestCase):
             title='Recent Event',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             rule=self.rule,
             calendar=self.calendar,
         )
 
     @override_settings(USE_TZ=False)
     def test_timezone_off(self):
-        url = reverse('day_calendar', kwargs={'calendar_slug': self.calendar.slug})
+        url = reverse('day_calendar', kwargs={
+                      'calendar_slug': self.calendar.slug})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -47,7 +49,8 @@ class TestViewUtils(TestCase):
             title='Recent Event',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             rule=self.rule,
             calendar=self.calendar,
         )
@@ -67,7 +70,7 @@ class TestViewUtils(TestCase):
 
     def test_get_occurrence_persisted(self):
         date = timezone.make_aware(datetime.datetime(year=2008, month=1,
-                                   day=5, hour=8, minute=0, second=0),
+                                                     day=5, hour=8, minute=0, second=0),
                                    pytz.utc)
         occurrence = self.event.get_occurrence(date)
         occurrence.save()
@@ -87,13 +90,15 @@ class TestViewUtils(TestCase):
 
     def test_coerce_date_dict(self):
         self.assertEqual(
-            coerce_date_dict({'year': '2008', 'month': '4', 'day': '2', 'hour': '4', 'minute': '4', 'second': '4'}),
+            coerce_date_dict({'year': '2008', 'month': '4', 'day': '2',
+                              'hour': '4', 'minute': '4', 'second': '4'}),
             {'year': 2008, 'month': 4, 'day': 2, 'hour': 4, 'minute': 4, 'second': 4})
 
     def test_coerce_date_dict_partial(self):
         self.assertEqual(
             coerce_date_dict({'year': '2008', 'month': '4', 'day': '2'}),
-            {'year': 2008, 'month': 4, 'day': 2, 'hour': 0, 'minute': 0, 'second': 0}
+            {'year': 2008, 'month': 4, 'day': 2,
+                'hour': 0, 'minute': 0, 'second': 0}
         )
 
     def test_coerce_date_dict_empty(self):
@@ -105,7 +110,8 @@ class TestViewUtils(TestCase):
     def test_coerce_date_dict_missing_values(self):
         self.assertEqual(
             coerce_date_dict({'year': '2008', 'month': '4', 'hours': '3'}),
-            {'year': 2008, 'month': 4, 'day': 1, 'hour': 0, 'minute': 0, 'second': 0}
+            {'year': 2008, 'month': 4, 'day': 1,
+                'hour': 0, 'minute': 0, 'second': 0}
         )
 
 
@@ -117,30 +123,35 @@ class TestUrls(TestCase):
         response = self.client.get(
             reverse("year_calendar", kwargs={"calendar_slug": 'example'}), {})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context[0]["calendar"].name, "Example Calendar")
+        self.assertEqual(response.context[0]
+                         ["calendar"].name, "Example Calendar")
 
     def test_calendar_month_view(self):
         response = self.client.get(
             reverse("month_calendar", kwargs={"calendar_slug": 'example'}), {'year': 2000, 'month': 11})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context[0]["calendar"].name, "Example Calendar")
+        self.assertEqual(response.context[0]
+                         ["calendar"].name, "Example Calendar")
         month = response.context[0]["period"]
         self.assertEqual((month.start, month.end),
                          (datetime.datetime(2000, 11, 1, 0, 0, tzinfo=pytz.utc),
                           datetime.datetime(2000, 12, 1, 0, 0, tzinfo=pytz.utc)))
 
     def test_event_creation_anonymous_user(self):
-        response = self.client.get(reverse("calendar_create_event", kwargs={"calendar_slug": 'example'}))
+        response = self.client.get(
+            reverse("calendar_create_event", kwargs={"calendar_slug": 'example'}))
         self.assertEqual(response.status_code, 302)
 
     def test_event_creation_authenticated_user(self):
         self.client.login(username="admin", password="admin")
-        response = self.client.get(reverse("calendar_create_event", kwargs={"calendar_slug": 'example'}))
+        response = self.client.get(
+            reverse("calendar_create_event", kwargs={"calendar_slug": 'example'}))
 
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(
-            reverse("calendar_create_event", kwargs={"calendar_slug": 'example'}),
+            reverse("calendar_create_event", kwargs={
+                    "calendar_slug": 'example'}),
             {'description': 'description',
              'title': 'title',
              'end_recurring_period_1': '10:22:00', 'end_recurring_period_0': '2008-10-30',
@@ -151,7 +162,8 @@ class TestUrls(TestCase):
 
         highest_event_id = self.highest_event_id
         highest_event_id += 1
-        response = self.client.get(reverse("event", kwargs={"event_id": highest_event_id}))
+        response = self.client.get(
+            reverse("event", kwargs={"event_id": highest_event_id}))
         self.assertEqual(response.status_code, 200)
 
     def test_view_event(self):
@@ -160,13 +172,15 @@ class TestUrls(TestCase):
 
     def test_delete_event_anonymous_user(self):
         # Only logged-in users should be able to delete, so we're redirected
-        response = self.client.get(reverse("delete_event", kwargs={"event_id": 1}))
+        response = self.client.get(
+            reverse("delete_event", kwargs={"event_id": 1}))
         self.assertEqual(response.status_code, 302)
 
     def test_delete_event_authenticated_user(self):
         self.client.login(username="admin", password="admin")
         # Load the deletion page
-        response = self.client.get(reverse("delete_event", kwargs={"event_id": 1}))
+        response = self.client.get(
+            reverse("delete_event", kwargs={"event_id": 1}))
         self.assertEqual(response.status_code, 200)
         if USE_FULLCALENDAR:
             self.assertEqual(
@@ -178,11 +192,13 @@ class TestUrls(TestCase):
                 reverse('day_calendar', args=[Event.objects.get(id=1).calendar.slug]))
 
         # Delete the event
-        response = self.client.post(reverse("delete_event", kwargs={"event_id": 1}))
+        response = self.client.post(
+            reverse("delete_event", kwargs={"event_id": 1}))
         self.assertEqual(response.status_code, 302)
 
         # Since the event is now deleted, we get a 404
-        response = self.client.get(reverse("delete_event", kwargs={"event_id": 1}))
+        response = self.client.get(
+            reverse("delete_event", kwargs={"event_id": 1}))
         self.assertEqual(response.status_code, 404)
 
     def test_occurrences_api_returns_the_expected_occurrences(self):
@@ -193,8 +209,10 @@ class TestUrls(TestCase):
             title='Recent Event',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             rule=rule,
+            plot_id='1',
             calendar=calendar,
         )
         # test calendar slug
@@ -202,8 +220,10 @@ class TestUrls(TestCase):
             reverse("api_occurrences") + "?calendar={}&start={}&end={}".format(
                 'MyCal', datetime.datetime(2008, 1, 5), datetime.datetime(2008, 1, 6)))
         self.assertEqual(response.status_code, 200)
-        expected_content = [{'existed': False, 'end': '2008-01-05T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '', 'event_id': 8, 'end_recurring_period': '2008-05-05T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-05T08:00:00Z', 'id': 9}]
-        self.assertEqual(json.loads(response.content.decode()), expected_content)
+        expected_content = [{'existed': False, 'end': '2008-01-05T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
+                             'event_id': 8, 'end_recurring_period': '2008-05-05T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-05T08:00:00Z', 'id': 9, 'plot_id': '1'}]
+        self.assertEqual(json.loads(
+            response.content.decode()), expected_content)
 
     def test_occurrences_api_without_parameters_return_status_400(self):
         response = self.client.get(reverse("api_occurrences"))
@@ -224,9 +244,11 @@ class TestUrls(TestCase):
             title='Recent Event',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 1, 8, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 1, 8, 0, 0, tzinfo=pytz.utc),
             rule=rule,
             calendar=calendar,
+            plot_id='1'
         )
         Occurrence.objects.create(
             event=event,
@@ -234,7 +256,8 @@ class TestUrls(TestCase):
             description='Persisted occ test',
             start=datetime.datetime(2008, 1, 7, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 7, 8, 0, tzinfo=pytz.utc),
-            original_start=datetime.datetime(2008, 1, 7, 8, 0, tzinfo=pytz.utc),
+            original_start=datetime.datetime(
+                2008, 1, 7, 8, 0, tzinfo=pytz.utc),
             original_end=datetime.datetime(2008, 1, 7, 8, 0, tzinfo=pytz.utc),
         )
         # test calendar slug
@@ -244,8 +267,18 @@ class TestUrls(TestCase):
                 datetime.datetime(2008, 1, 5),
                 datetime.datetime(2008, 1, 8)))
         self.assertEqual(response.status_code, 200)
-        expected_content = [{'existed': False, 'end': '2008-01-05T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '', 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-05T08:00:00Z', 'id': 10}, {'existed': False, 'end': '2008-01-06T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '', 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-06T08:00:00Z', 'id': 10}, {'existed': False, 'end': '2008-01-07T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '', 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-07T08:00:00Z', 'id': 10}, {'existed': True, 'end': '2008-01-07T08:00:00Z', 'description': 'Persisted occ test', 'creator': 'None', 'color': '', 'title': 'My persisted Occ', 'rule': '', 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-07T08:00:00Z', 'id': 1}]
-        self.assertEqual(json.loads(response.content.decode()), expected_content)
+        expected_content = [
+            {'plot_id': '1', 'existed': False, 'end': '2008-01-05T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
+                'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-05T08:00:00Z', 'id': 10},
+            {'plot_id': '1', 'existed': False, 'end': '2008-01-06T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
+                'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-06T08:00:00Z', 'id': 10},
+            {'plot_id': '1', 'existed': False, 'end': '2008-01-07T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
+                'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-07T08:00:00Z', 'id': 10},
+            {'plot_id': '1', 'existed': True, 'end': '2008-01-07T08:00:00Z', 'description': 'Persisted occ test', 'creator': 'None', 'color': '', 'title': 'My persisted Occ',
+                'rule': '', 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-07T08:00:00Z', 'id': 1}
+        ]
+        self.assertEqual(json.loads(
+            response.content.decode()), expected_content)
         # test timezone param
         response = self.client.get(
             reverse("api_occurrences") + "?calendar={}&start={}&end={}&timezone={}".format(
@@ -254,8 +287,14 @@ class TestUrls(TestCase):
                 datetime.datetime(2008, 1, 8),
                 'America/Chicago'))
         self.assertEqual(response.status_code, 200)
-        expected_content = [{u'existed': False, u'end': u'2008-01-05T03:00:00-06:00', u'description': '', u'creator': u'None', u'color': '', u'title': u'Recent Event', u'rule': u'', u'event_id': 8, u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'cancelled': False, u'calendar': u'MyCalSlug', u'start': u'2008-01-05T02:00:00-06:00', u'id': 10}, {u'existed': False, u'end': u'2008-01-06T03:00:00-06:00', u'description': '', u'creator': u'None', u'color': '', u'title': u'Recent Event', u'rule': u'', u'event_id': 8, u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'cancelled': False, u'calendar': u'MyCalSlug', u'start': u'2008-01-06T02:00:00-06:00', u'id': 10}, {u'existed': False, u'end': u'2008-01-07T03:00:00-06:00', u'description': '', u'creator': u'None', u'color': '', u'title': u'Recent Event', u'rule': u'', u'event_id': 8, u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'cancelled': False, u'calendar': u'MyCalSlug', u'start': u'2008-01-07T02:00:00-06:00', u'id': 10}, {u'existed': True, u'end': u'2008-01-07T02:00:00-06:00', u'description': u'Persisted occ test', u'creator': u'None', u'color': '', u'title': u'My persisted Occ', u'rule': u'', u'event_id': 8, u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'cancelled': False, u'calendar': u'MyCalSlug', u'start': u'2008-01-07T02:00:00-06:00', u'id': 1}]
-        self.assertEqual(json.loads(response.content.decode()), expected_content)
+        expected_content = [
+            {u'start': u'2008-01-05T02:00:00-06:00', u'plot_id': u'1', u'description': u'', u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'calendar': u'MyCalSlug', u'cancelled': False, u'id': 10, u'existed': False, u'title': u'Recent Event', u'event_id': 8, u'end': u'2008-01-05T03:00:00-06:00', u'creator': u'None', u'color': u'', u'rule': u''},
+            {u'description': u'', u'title': u'Recent Event', u'event_id': 8, u'calendar': u'MyCalSlug', u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'rule': u'', u'creator': u'None', u'cancelled': False, u'existed': False, u'start': u'2008-01-06T02:00:00-06:00', u'end': u'2008-01-06T03:00:00-06:00', u'id': 10, u'plot_id': u'1', u'color': u''},
+            {u'color': u'', u'start': u'2008-01-07T02:00:00-06:00', u'rule': u'', u'title': u'Recent Event', u'end': u'2008-01-07T03:00:00-06:00', u'existed': False, u'event_id': 8, u'cancelled': False, u'description': u'', u'calendar': u'MyCalSlug', u'creator': u'None', u'plot_id': u'1', u'id': 10, u'end_recurring_period': u'2008-01-07T18:00:00-06:00'},
+            {u'cancelled': False, u'existed': True, u'id': 1, u'rule': u'', u'calendar': u'MyCalSlug', u'event_id': 8, u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'color': u'', u'title': u'My persisted Occ', u'description': u'Persisted occ test', u'end': u'2008-01-07T02:00:00-06:00', u'start': u'2008-01-07T02:00:00-06:00', u'plot_id': u'1', u'creator': u'None'}
+        ]
+        self.assertEqual(json.loads(
+            response.content.decode()), expected_content)
 
     def test_occurrences_api_works_with_and_without_cal_slug(self):
         # create a calendar and event
@@ -264,7 +303,8 @@ class TestUrls(TestCase):
             title='Recent Event',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             calendar=calendar,
         )
         # test calendar slug
@@ -290,20 +330,22 @@ class TestUrls(TestCase):
             title='Recent Event 1',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             calendar=calendar1,
         )
         event2 = Event.objects.create(
             title='Recent Event 2',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             calendar=calendar2,
         )
         # Test both present with no cal arg
         response = self.client.get(reverse("api_occurrences"),
                                    {'start': '2008-01-05',
-                                   'end': '2008-02-05'}
+                                    'end': '2008-02-05'}
                                    )
         self.assertEqual(response.status_code, 200)
         resp_list = json.loads(response.content.decode('utf-8'))
@@ -325,7 +367,8 @@ class TestUrls(TestCase):
             title='Recent Event',
             start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
             end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
+            end_recurring_period=datetime.datetime(
+                2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             calendar=calendar,
         )
         # test works with date string time format '%Y-%m-%d'
@@ -346,28 +389,6 @@ class TestUrls(TestCase):
         self.assertEqual(response.status_code, 200)
         resp_list = json.loads(response.content.decode('utf-8'))
         self.assertIn(event.title, [d['title'] for d in resp_list])
-
-    def test_occurrences_api_fails_with_incorrect_date_string_formats(self):
-        # create a calendar and event
-        calendar = Calendar.objects.create(name="MyCal", slug='MyCalSlug')
-        event = Event.objects.create(
-            title='Recent Event',
-            start=datetime.datetime(2008, 1, 5, 8, 0, tzinfo=pytz.utc),
-            end=datetime.datetime(2008, 1, 5, 9, 0, tzinfo=pytz.utc),
-            end_recurring_period=datetime.datetime(2008, 5, 5, 0, 0, tzinfo=pytz.utc),
-            calendar=calendar,
-        )
-
-        # test fails with date string time format not '%Y-%m-%d' or '%Y-%m-%dT%H:%M:%S'
-        response = self.client.get(reverse("api_occurrences"),
-                                   {'start': '2008-01-05T00:00',
-                                    'end': '2008-02-05T00:00',
-                                    'calendar_slug': event.calendar.slug
-                                    })
-        self.assertEqual(response.status_code, 400)
-        resp = response.content.decode('utf-8')
-        expected_error = "does not match format '%Y-%m-%dT%H:%M:%S'"
-        self.assertIn(expected_error, resp)
 
     def test_check_next_url_valid_case(self):
         expected = '/calendar/1'
@@ -390,7 +411,9 @@ class TestUrls(TestCase):
         self.assertTrue(expected_feed in response.content.decode('utf8'))
 
     def test_calendar_view_home(self):
-        calendar_view_url = reverse('calendar_home', kwargs={'calendar_slug': 'example'})
+        calendar_view_url = reverse('calendar_home', kwargs={
+                                    'calendar_slug': 'example'})
         response = self.client.get(calendar_view_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue('<a href="/feed/calendar/upcoming/1/">Feed</a>' in response.content.decode('utf8'))
+        self.assertTrue(
+            '<a href="/feed/calendar/upcoming/1/">Feed</a>' in response.content.decode('utf8'))

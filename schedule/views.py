@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 
-from dateutil import parser
 import pytz
+from dateutil import parser
 from django.conf import settings
 from django.db.models import F, Q
 from django.http import (
@@ -296,8 +296,12 @@ def get_next_url(request, default):
 
 @check_calendar_permissions
 def api_occurrences(request, **kwargs):
-    start = request.GET.get('start')
-    end = request.GET.get('end')
+    start = None
+    end = None
+    if request.GET.get('start') is not None:
+        start = request.GET.get('start').split('T')[0]
+    if request.GET.get('end') is not None:
+        end = request.GET.get('end').split('T')[0]
     calendar_slug = request.GET.get('calendar_slug')
     timezone = request.GET.get('timezone')
 
@@ -322,13 +326,8 @@ def _api_occurrences(start, end, calendar_slug, timezone):
                 try:
                     return datetime.strptime(ddatetime, '%Y-%m-%d')
                 except ValueError:
-                    try:
-                        # try a different date string format first before failing
-                        return datetime.strptime(ddatetime, '%Y-%m-%dT%H:%M:%S')
-                    except ValueError:
-                        date_str, tz = ddatetime[:-6], ddatetime[-6:]
-                        dt_utc = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
-                        return dt_utc.replace(tzinfo=MyFixedOffset(tz))
+                    # try a different date string format first before failing
+                    return datetime.strptime(ddatetime, '%Y-%m-%dT%H:%M:%S')
     else:
         def convert(ddatetime):
             return datetime.utcfromtimestamp(float(ddatetime))
@@ -336,16 +335,16 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     start = convert(start)
     end = convert(end)
     current_tz = False
-    # if timezone and timezone in pytz.common_timezones:
-    #     # make start and end dates aware in given timezone
-    #     current_tz = pytz.timezone(timezone)
-    #     start = current_tz.localize(start)
-    #     end = current_tz.localize(end)
-    # elif settings.USE_TZ:
-    #     # If USE_TZ is True, make start and end dates aware in UTC timezone
-    #     utc = pytz.UTC
-    #     start = utc.localize(start)
-    #     end = utc.localize(end)
+    if timezone and timezone in pytz.common_timezones:
+        # make start and end dates aware in given timezone
+        current_tz = pytz.timezone(timezone)
+        start = current_tz.localize(start)
+        end = current_tz.localize(end)
+    elif settings.USE_TZ:
+        # If USE_TZ is True, make start and end dates aware in UTC timezone
+        utc = pytz.UTC
+        start = utc.localize(start)
+        end = utc.localize(end)
 
     if calendar_slug:
         # will raise DoesNotExist exception if no match
@@ -500,34 +499,3 @@ def _api_select_create(start, end, calendar_slug):
     response_data = {}
     response_data['status'] = "OK"
     return response_data
-
-
-class MyFixedOffset(tzinfo):
-    """offset_str: Fixed offset in str: e.g. '-04:00'"""
-    def __init__(self, offset_str):
-        sign, hours, minutes = offset_str[0], offset_str[1:3], offset_str[4:]
-        offset = (int(hours) * 60 + int(minutes)) * (-1 if sign == "-" else 1)
-        self.__offset = timedelta(minutes=offset)
-        # NOTE: the last part is to remind about deprecated POSIX GMT+h timezones
-        # that have the opposite sign in the name;
-        # the corresponding numeric value is not used e.g., no minutes
-        '<%+03d%02d>%+d' % (int(hours), int(minutes), int(hours) * -1)
-    def utcoffset(self, dt=None):
-        return self.__offset
-
-    def localize(self, dt=None):
-        # TODO implemnt properly
-        return dt
-
-    def normalize(self, dt=None):
-        # TODO implemnt properly
-        return dt
-
-    def tzname(self, dt=None):
-        return self.__name
-
-    def dst(self, dt=None):
-        return timedelta(0)
-
-    def __repr__(self):
-        return 'MyFixedOffset(%d)' % (self.utcoffset().total_seconds() / 60)
