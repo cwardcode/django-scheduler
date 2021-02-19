@@ -213,6 +213,7 @@ class TestUrls(TestCase):
                 2008, 5, 5, 0, 0, tzinfo=pytz.utc),
             rule=rule,
             plot_id='1',
+            tree_id='1',
             calendar=calendar,
         )
         # test calendar slug
@@ -221,7 +222,8 @@ class TestUrls(TestCase):
                 'MyCal', datetime.datetime(2008, 1, 5), datetime.datetime(2008, 1, 6)))
         self.assertEqual(response.status_code, 200)
         expected_content = [{'existed': False, 'end': '2008-01-05T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
-                             'event_id': 8, 'end_recurring_period': '2008-05-05T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-05T08:00:00Z', 'id': 9, 'plot_id': '1'}]
+                             'event_id': 8, 'end_recurring_period': '2008-05-05T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-05T08:00:00Z', 'id': 9,
+                             'plot_id': '1', 'tree_id': '1'}]
         self.assertEqual(json.loads(
             response.content.decode()), expected_content)
 
@@ -248,7 +250,8 @@ class TestUrls(TestCase):
                 2008, 1, 8, 0, 0, tzinfo=pytz.utc),
             rule=rule,
             calendar=calendar,
-            plot_id='1'
+            plot_id='1',
+            tree_id='1'
         )
         Occurrence.objects.create(
             event=event,
@@ -268,13 +271,13 @@ class TestUrls(TestCase):
                 datetime.datetime(2008, 1, 8)))
         self.assertEqual(response.status_code, 200)
         expected_content = [
-            {'plot_id': '1', 'existed': False, 'end': '2008-01-05T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
+            {'tree_id': '1', 'plot_id': '1', 'existed': False, 'end': '2008-01-05T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
                 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-05T08:00:00Z', 'id': 10},
-            {'plot_id': '1', 'existed': False, 'end': '2008-01-06T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
+            {'tree_id': '1', 'plot_id': '1', 'existed': False, 'end': '2008-01-06T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
                 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-06T08:00:00Z', 'id': 10},
-            {'plot_id': '1', 'existed': False, 'end': '2008-01-07T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
+            {'tree_id': '1', 'plot_id': '1', 'existed': False, 'end': '2008-01-07T09:00:00Z', 'description': '', 'creator': 'None', 'color': '', 'title': 'Recent Event', 'rule': '',
                 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-07T08:00:00Z', 'id': 10},
-            {'plot_id': '1', 'existed': True, 'end': '2008-01-07T08:00:00Z', 'description': 'Persisted occ test', 'creator': 'None', 'color': '', 'title': 'My persisted Occ',
+            {'tree_id': '1', 'plot_id': '1', 'existed': True, 'end': '2008-01-07T08:00:00Z', 'description': 'Persisted occ test', 'creator': 'None', 'color': '', 'title': 'My persisted Occ',
                 'rule': '', 'event_id': 8, 'end_recurring_period': '2008-01-08T00:00:00Z', 'cancelled': False, 'calendar': 'MyCalSlug', 'start': '2008-01-07T08:00:00Z', 'id': 1}
         ]
         self.assertEqual(json.loads(
@@ -288,10 +291,10 @@ class TestUrls(TestCase):
                 'America/Chicago'))
         self.assertEqual(response.status_code, 200)
         expected_content = [
-            {u'start': u'2008-01-05T02:00:00-06:00', u'plot_id': u'1', u'description': u'', u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'calendar': u'MyCalSlug', u'cancelled': False, u'id': 10, u'existed': False, u'title': u'Recent Event', u'event_id': 8, u'end': u'2008-01-05T03:00:00-06:00', u'creator': u'None', u'color': u'', u'rule': u''},
-            {u'description': u'', u'title': u'Recent Event', u'event_id': 8, u'calendar': u'MyCalSlug', u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'rule': u'', u'creator': u'None', u'cancelled': False, u'existed': False, u'start': u'2008-01-06T02:00:00-06:00', u'end': u'2008-01-06T03:00:00-06:00', u'id': 10, u'plot_id': u'1', u'color': u''},
-            {u'color': u'', u'start': u'2008-01-07T02:00:00-06:00', u'rule': u'', u'title': u'Recent Event', u'end': u'2008-01-07T03:00:00-06:00', u'existed': False, u'event_id': 8, u'cancelled': False, u'description': u'', u'calendar': u'MyCalSlug', u'creator': u'None', u'plot_id': u'1', u'id': 10, u'end_recurring_period': u'2008-01-07T18:00:00-06:00'},
-            {u'cancelled': False, u'existed': True, u'id': 1, u'rule': u'', u'calendar': u'MyCalSlug', u'event_id': 8, u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'color': u'', u'title': u'My persisted Occ', u'description': u'Persisted occ test', u'end': u'2008-01-07T02:00:00-06:00', u'start': u'2008-01-07T02:00:00-06:00', u'plot_id': u'1', u'creator': u'None'}
+            {u'start': u'2008-01-05T02:00:00-06:00', u'plot_id': u'1', u'tree_id': u'1', u'description': u'', u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'calendar': u'MyCalSlug', u'cancelled': False, u'id': 10, u'existed': False, u'title': u'Recent Event', u'event_id': 8, u'end': u'2008-01-05T03:00:00-06:00', u'creator': u'None', u'color': u'', u'rule': u''},
+            {u'description': u'', u'title': u'Recent Event', u'event_id': 8, u'calendar': u'MyCalSlug', u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'rule': u'', u'creator': u'None', u'cancelled': False, u'existed': False, u'start': u'2008-01-06T02:00:00-06:00', u'end': u'2008-01-06T03:00:00-06:00', u'id': 10, u'tree_id': u'1', u'plot_id': u'1', u'color': u''},
+            {u'color': u'', u'start': u'2008-01-07T02:00:00-06:00', u'rule': u'', u'title': u'Recent Event', u'end': u'2008-01-07T03:00:00-06:00', u'existed': False, u'event_id': 8, u'cancelled': False, u'description': u'', u'calendar': u'MyCalSlug', u'creator': u'None', u'tree_id': u'1', u'plot_id': u'1', u'id': 10, u'end_recurring_period': u'2008-01-07T18:00:00-06:00'},
+            {u'cancelled': False, u'existed': True, u'id': 1, u'rule': u'', u'calendar': u'MyCalSlug', u'event_id': 8, u'end_recurring_period': u'2008-01-07T18:00:00-06:00', u'color': u'', u'title': u'My persisted Occ', u'description': u'Persisted occ test', u'end': u'2008-01-07T02:00:00-06:00', u'start': u'2008-01-07T02:00:00-06:00', u'tree_id': u'1', u'plot_id': u'1', u'creator': u'None'}
         ]
         self.assertEqual(json.loads(
             response.content.decode()), expected_content)

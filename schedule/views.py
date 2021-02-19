@@ -408,6 +408,7 @@ def _api_occurrences(start, end, calendar_slug, timezone):
                 'existed': existed,
                 'event_id': occurrence.event.id,
                 "plot_id": occurrence.event.plot_id,
+                "tree_id": occurrence.event.tree_id,
                 'color': occurrence.event.color_event,
                 'description': occurrence.description,
                 'rule': recur_rule,

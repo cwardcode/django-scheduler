@@ -53,6 +53,7 @@ class Event(models.Model):
     other models.
     '''
     plot_id = models.CharField(_("Plot Id"), max_length=20, blank=True)
+    tree_id = models.CharField(_("Tree Id"), max_length=20, blank=True)
     start = models.DateTimeField(_("start"), db_index=True)
     end = models.DateTimeField(_("end"), db_index=True, help_text=_("The end time must be later than the start time."))
     title = models.CharField(_("title"), max_length=255)
