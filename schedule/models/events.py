@@ -60,7 +60,7 @@ class Event(models.Model):
     description = models.TextField(_("description"), blank=True)
     creator = models.ForeignKey(
         django_settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("creator"),
@@ -69,7 +69,7 @@ class Event(models.Model):
     updated_on = models.DateTimeField(_("updated on"), auto_now=True)
     rule = models.ForeignKey(
         Rule,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("rule"),
@@ -666,6 +666,11 @@ class Occurrence(models.Model):
 
     def __lt__(self, other):
         return self.end < other.end
+
+    def __hash__(self):
+        if not self.pk:
+            raise TypeError("Model instances without primary key value are unhashable")
+        return hash(self.pk)
 
     def __eq__(self, other):
         return (isinstance(other, Occurrence) and
