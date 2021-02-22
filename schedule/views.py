@@ -365,58 +365,38 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     i = 1
     if Occurrence.objects.all().count() > 0:
         i = Occurrence.objects.latest('id').id + 1
-    event_list = []
-    for calendar in calendars:
-        # create flat list of events from each calendar
-        event_list += calendar.events.filter(start__lte=end).filter(
-            Q(end_recurring_period__gte=start) |
-            Q(end_recurring_period__isnull=True))
-    for event in event_list:
-        occurrences = event.get_occurrences(start, end)
-        for occurrence in occurrences:
-            occurrence_id = i + occurrence.event.id
-            existed = False
+    
+    occurrences = Occurrence.objects.all().filter(Q(end__gte=start))
+    for occurrence in occurrences:
+        occurrence_id = i
+        existed = False
 
-            if occurrence.id:
-                occurrence_id = occurrence.id
-                existed = True
+        if occurrence.id:
+            occurrence_id = occurrence.id
+            existed = True
 
-            recur_rule = occurrence.event.rule.name \
-                if occurrence.event.rule else None
+        event_start = occurrence.start
+        event_end = occurrence.end
+        if current_tz:
+            # make event start and end dates aware in given timezone
+            event_start = event_start.astimezone(current_tz)
+            event_end = event_end.astimezone(current_tz)
 
-            if occurrence.event.end_recurring_period:
-                recur_period_end = occurrence.event.end_recurring_period
-                if current_tz:
-                    # make recur_period_end aware in given timezone
-                    recur_period_end = recur_period_end.astimezone(current_tz)
-                recur_period_end = recur_period_end
-            else:
-                recur_period_end = None
-
-            event_start = occurrence.start
-            event_end = occurrence.end
-            if current_tz:
-                # make event start and end dates aware in given timezone
-                event_start = event_start.astimezone(current_tz)
-                event_end = event_end.astimezone(current_tz)
-
-            response_data.append({
-                'id': occurrence_id,
-                'title': occurrence.title,
-                'start': event_start,
-                'end': event_end,
-                'existed': existed,
-                'event_id': occurrence.event.id,
-                "plot_id": occurrence.event.plot_id,
-                "tree_id": occurrence.event.tree_id,
-                'color': occurrence.event.color_event,
-                'description': occurrence.description,
-                'rule': recur_rule,
-                'end_recurring_period': recur_period_end,
-                'creator': str(occurrence.event.creator),
-                'calendar': occurrence.event.calendar.slug,
-                'cancelled': occurrence.cancelled,
-            })
+        response_data.append({
+            'id': occurrence_id,
+            'title': occurrence.title,
+            'start': event_start,
+            'end': event_end,
+            'existed': existed,
+            "plot_id": occurrence.plot_id,
+            "tree_id": occurrence.tree_id,
+            'color': occurrence.color_event,
+            'description': occurrence.description,
+            'creator': str(occurrence.creator),
+            'calendar': occurrence.calendar.slug,
+            'cancelled': occurrence.cancelled,
+            'occ_created': occurrence.occ_created,
+        })
     return response_data
 
 

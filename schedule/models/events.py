@@ -561,8 +561,9 @@ class EventRelation(models.Model):
 
 @python_2_unicode_compatible
 class Occurrence(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, verbose_name=_("event"))
+    event = models.ForeignKey(Event, on_delete=models.SET_NULL, verbose_name=_("event"), null=True)
     title = models.CharField(_("title"), max_length=255, blank=True)
+    occ_created = models.CharField(_("occ_created"), max_length=255, blank=True)
     description = models.TextField(_("description"), blank=True)
     start = models.DateTimeField(_("start"), db_index=True)
     end = models.DateTimeField(_("end"), db_index=True)
@@ -571,14 +572,28 @@ class Occurrence(models.Model):
     original_end = models.DateTimeField(_("original end"))
     created_on = models.DateTimeField(_("created on"), auto_now_add=True)
     updated_on = models.DateTimeField(_("updated on"), auto_now=True)
-
+    plot_id = models.CharField(_("Plot Id"), max_length=20, blank=True)
+    tree_id = models.CharField(_("Tree Id"), max_length=20, blank=True)
+    creator = models.ForeignKey(
+        django_settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("occurrence_creator"),
+        related_name='occurrence_creator')
+    calendar = models.ForeignKey(
+        Calendar,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        verbose_name=_("occurrence_calendar"))
+    color_event = models.CharField(_("Color event"), blank=True, max_length=10)
     class Meta(object):
         verbose_name = _("occurrence")
         verbose_name_plural = _("occurrences")
         index_together = (
             ('start', 'end'),
         )
-
     def __init__(self, *args, **kwargs):
         super(Occurrence, self).__init__(*args, **kwargs)
         if not self.title and self.event_id:
