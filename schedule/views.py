@@ -221,7 +221,8 @@ class CreateEventView(EventEditMixin, CreateView):
     def form_valid(self, form):
         event = form.save(commit=False)
         event.creator = self.request.user
-        event.calendar = get_object_or_404(Calendar, slug=self.kwargs['calendar_slug'])
+        event.calendar = get_object_or_404(
+            Calendar, slug=self.kwargs['calendar_slug'])
         event.save()
         return HttpResponseRedirect(event.get_absolute_url())
 
@@ -243,7 +244,8 @@ class DeleteEventView(EventEditMixin, DeleteView):
         # Lastly redirect to the event detail of the recently create event
         """
         url_val = 'fullcalendar' if USE_FULLCALENDAR else 'day_calendar'
-        next_url = self.kwargs.get('next') or reverse(url_val, args=[self.object.calendar.slug])
+        next_url = self.kwargs.get('next') or reverse(
+            url_val, args=[self.object.calendar.slug])
         next_url = get_next_url(self.request, next_url)
         return next_url
 
@@ -264,8 +266,8 @@ def get_occurrence(event_id, occurrence_id=None, year=None, month=None,
     elif None not in (year, month, day, hour, minute, second):
         event = get_object_or_404(Event, id=event_id)
         date = timezone.make_aware(datetime(int(year), int(month),
-                                   int(day), int(hour), int(minute),
-                                   int(second)), tzinfo)
+                                            int(day), int(hour), int(minute),
+                                            int(second)), tzinfo)
         occurrence = event.get_occurrence(date)
         if occurrence is None:
             raise Http404
@@ -288,7 +290,8 @@ def get_next_url(request, default):
     next_url = default
     if OCCURRENCE_CANCEL_REDIRECT:
         next_url = OCCURRENCE_CANCEL_REDIRECT
-    _next_url = request.GET.get('next') if request.method in ['GET', 'HEAD'] else request.POST.get('next')
+    _next_url = request.GET.get('next') if request.method in [
+        'GET', 'HEAD'] else request.POST.get('next')
     if _next_url and is_safe_url(url=_next_url, host=request.get_host()):
         next_url = _next_url
     return next_url
@@ -365,8 +368,9 @@ def _api_occurrences(start, end, calendar_slug, timezone):
     i = 1
     if Occurrence.objects.all().count() > 0:
         i = Occurrence.objects.latest('id').id + 1
-    
-    occurrences = Occurrence.objects.all().filter(Q(end__gte=start))
+
+    occurrences = Occurrence.objects.all().filter(
+        Q(start__lte=end)).filter(Q(end__gte=start))
     for occurrence in occurrences:
         occurrence_id = i
         existed = False
